@@ -2,7 +2,6 @@ package xyz.playedu.certificate.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import java.util.*;
@@ -11,21 +10,17 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.playedu.certificate.domain.CertificateRecord;
 import xyz.playedu.certificate.mapper.CertificateRecordMapper;
 import xyz.playedu.certificate.service.CertificateRecordService;
 import xyz.playedu.common.exception.NotFoundException;
 import xyz.playedu.common.types.paginate.PaginationResult;
-import xyz.playedu.common.util.S3Util;
 
 @Service
 public class CertificateRecordServiceImpl
         extends ServiceImpl<CertificateRecordMapper, CertificateRecord>
         implements CertificateRecordService {
-
-    @Autowired private S3Util s3Util;
 
     @Override
     public PaginationResult<CertificateRecord> paginate(int page, int size, Integer userId,
@@ -102,7 +97,10 @@ public class CertificateRecordServiceImpl
         if (record == null || record.getCertImage().isEmpty()) {
             throw new NotFoundException("证书文件不存在");
         }
-        byte[] imageBytes = s3Util.getObjectBytes(record.getCertImage());
+        return exportPdfFromImageBytes(null, record);
+    }
+
+    public byte[] exportPdfFromImageBytes(byte[] imageBytes, CertificateRecord record) throws Exception {
         PDDocument document = new PDDocument();
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
@@ -112,9 +110,10 @@ public class CertificateRecordServiceImpl
         PDPageContentStream cs = new PDPageContentStream(document, page);
         cs.drawImage(pdImage, 30, 30, pageW - 60, pageH - 60);
         cs.close();
-        byte[] pdfBytes = documentToBytes(document);
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        document.save(baos);
         document.close();
-        return pdfBytes;
+        return baos.toByteArray();
     }
 
     @Override
@@ -129,11 +128,5 @@ public class CertificateRecordServiceImpl
     private String generateCertNo() {
         return "CERT" + DateUtil.format(new Date(), "yyyyMMddHHmmss") +
                String.format("%04d", new Random().nextInt(10000));
-    }
-
-    private byte[] documentToBytes(PDDocument document) throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        document.save(baos);
-        return baos.toByteArray();
     }
 }

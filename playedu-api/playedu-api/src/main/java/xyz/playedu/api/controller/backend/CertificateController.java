@@ -25,6 +25,7 @@ import xyz.playedu.common.domain.AdminUser;
 import xyz.playedu.common.domain.User;
 import xyz.playedu.common.exception.NotFoundException;
 import xyz.playedu.common.service.AdminUserService;
+import xyz.playedu.common.service.AppConfigService;
 import xyz.playedu.common.service.UserService;
 import xyz.playedu.common.types.JsonResponse;
 import xyz.playedu.common.types.paginate.PaginationResult;
@@ -41,9 +42,9 @@ public class CertificateController {
     @Autowired private CertificateRuleService ruleService;
     @Autowired private CertificateGenerateService generateService;
     @Autowired private CourseService courseService;
+    @Autowired private AppConfigService appConfigService;
     @Autowired private UserService userService;
     @Autowired private AdminUserService adminUserService;
-    @Autowired private S3Util s3Util;
 
     // ==================== Template ====================
 
@@ -203,7 +204,7 @@ public class CertificateController {
         }
 
         // 生成证书图片
-        String s3Url = s3Util.getUrl(template.getBackgroundImage());
+        String s3Url = new S3Util(appConfigService.getS3Config()).getUrl(template.getBackgroundImage());
         String certNo = "CERT" + DateUtil.format(new Date(), "yyyyMMddHHmmss") +
                         String.format("%04d", new Random().nextInt(10000));
         String verifyUrl = "/certificate/verify?id=" + certNo;
@@ -221,7 +222,7 @@ public class CertificateController {
 
         // 上传证书图片到S3
         String certImageKey = "certificates/" + certNo + ".png";
-        s3Util.uploadObject(certImageKey, certImageBytes, "image/png");
+        new S3Util(appConfigService.getS3Config()).uploadObject(certImageKey, certImageBytes, "image/png");
 
         recordService.issue(templateId, userId, user.getName(), courseId, course.getTitle(),
                 certImageKey, "manual", null, BCtx.getId());
@@ -267,7 +268,7 @@ public class CertificateController {
         result.put("issued_at", record.getIssuedAt());
         result.put("status", record.getStatus());
         result.put("template_name", template != null ? template.getName() : "");
-        result.put("cert_image", s3Util.getUrl(record.getCertImage()));
+        result.put("cert_image", new S3Util(appConfigService.getS3Config()).getUrl(record.getCertImage()));
         return JsonResponse.data(result);
     }
 }
