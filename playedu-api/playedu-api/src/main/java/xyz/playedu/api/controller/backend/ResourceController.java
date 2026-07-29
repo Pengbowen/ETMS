@@ -66,6 +66,7 @@ public class ResourceController {
 
     @Autowired private PlayEduConfig playEduConfig;
 
+
     @GetMapping("/index")
     @Log(title = "资源-列表", businessType = BusinessTypeConstant.GET)
     public JsonResponse index(@RequestParam HashMap<String, Object> params) {

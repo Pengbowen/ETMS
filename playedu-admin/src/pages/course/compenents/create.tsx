@@ -634,7 +634,7 @@ export const CourseCreate: React.FC<PropInterface> = ({
                                 height: 32,
                                 lineHeight: "32px",
                                 fontSize: 14,
-                                color: "#FF4D4F",
+                                color: "#266bcb",
                                 background: "rgba(255,77,79,0.1)",
                                 marginRight: 16,
                                 marginBottom: 16,

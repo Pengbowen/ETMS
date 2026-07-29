@@ -15,6 +15,7 @@ import { ExclamationCircleFilled } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { dateFormat } from "../../../utils/index";
 import { TreeCategory, UploadCoursewareButton } from "../../../compenents";
+import { DocumentPreview } from "../../../compenents/document-preview";
 import { CoursewareUpdateDialog } from "./compenents/update-dialog";
 
 const { confirm } = Modal;
@@ -60,6 +61,8 @@ const ResourceCoursewarePage = () => {
   const [cateId, setCateId] = useState(Number(result.get("cid")));
   const [updateId, setUpdateId] = useState(0);
   const [updateVisible, setUpdateVisible] = useState(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewResource, setPreviewResource] = useState<any>(null);
   const types = [
     { label: "全部", value: "WORD,EXCEL,PPT,PDF,TXT,RAR,ZIP" },
     { label: "WORD", value: "WORD" },
@@ -163,6 +166,17 @@ const ResourceCoursewarePage = () => {
               }}
             >
               下载
+            </Button>
+            <div className="form-column"></div>
+            <Button
+              type="link"
+              size="small"
+              className="b-n-link c-red"
+              onClick={() => {
+                previewFile(record);
+              }}
+            >
+              预览
             </Button>
             <div className="form-column"></div>
             <Button
@@ -279,6 +293,17 @@ const ResourceCoursewarePage = () => {
     // 释放 URL 对象
     URL.revokeObjectURL(url);
     document.body.removeChild(a);
+  };
+
+  const previewFile = (record: any) => {
+    setPreviewResource({
+      id: record.id,
+      name: record.name,
+      type: record.type,
+      url: resourceUrl[record.id],
+      extension: record.extension,
+    });
+    setPreviewVisible(true);
   };
 
   return (
@@ -404,6 +429,11 @@ const ResourceCoursewarePage = () => {
           }}
         ></CoursewareUpdateDialog>
       </div>
+      <DocumentPreview
+        open={previewVisible}
+        resource={previewResource}
+        onCancel={() => setPreviewVisible(false)}
+      />
     </>
   );
 };

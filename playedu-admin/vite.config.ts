@@ -7,6 +7,12 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
+    proxy: {
+      "/backend": {
+        target: "http://127.0.0.1:9898",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
   build: {

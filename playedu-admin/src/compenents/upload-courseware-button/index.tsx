@@ -24,7 +24,7 @@ interface PropsInterface {
 export const UploadCoursewareButton = (props: PropsInterface) => {
   const [showModal, setShowModal] = useState(false);
   const localFileList = useRef<FileItem[]>([]);
-  const intervalId = useRef<number>();
+  const intervalId = useRef<ReturnType<typeof setInterval>>();
   const [fileList, setFileList] = useState<FileItem[]>([]);
 
   const getMinioUploadId = async (extension: string) => {

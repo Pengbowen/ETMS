@@ -25,8 +25,8 @@ export const UploadVideoFloatButton = () => {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const localFileList = useRef<FileItem[]>([]);
-  const intervalId = useRef<number>();
-  const intervalId2 = useRef<number>();
+  const intervalId = useRef<ReturnType<typeof setInterval>>();
+  const intervalId2 = useRef<ReturnType<typeof setInterval>>();
   const [successNum, setSuccessNum] = useState(0);
   const [fileList, setFileList] = useState<FileItem[]>([]);
   const uploadStatus = useSelector(
