@@ -250,4 +250,18 @@ public class S3Util {
 
         return getClient().generatePresignedUrl(request).toString();
     }
+
+    public String getUrl(String path) {
+        return generateEndpointPreSignUrl(path);
+    }
+
+    @SneakyThrows
+    public byte[] getObjectBytes(String path) {
+        S3Object s3Object = getClient().getObject(defaultConfig.getBucket(), path);
+        return s3Object.getObjectContent().readAllBytes();
+    }
+
+    public String uploadObject(String path, byte[] data, String contentType) {
+        return saveBytes(data, path, contentType);
+    }
 }

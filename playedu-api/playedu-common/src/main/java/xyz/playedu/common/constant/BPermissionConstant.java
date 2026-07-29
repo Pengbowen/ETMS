@@ -43,7 +43,9 @@ public class BPermissionConstant {
     public static final String SYSTEM_CONFIG = "system-config";
     public static final String UPLOAD = "upload";
     public static final String CACHE_MANAGE = "cache-manage";
-
+    public static final String CERTIFICATE_TEMPLATE = "certificate-template";
+    public static final String CERTIFICATE_RULE = "certificate-rule";
+    public static final String CERTIFICATE_RECORD = "certificate-record";
     // ##### 友情分割线 ##################################################
 
     public static final String DATA_USER_NAME = "data-user-name";
