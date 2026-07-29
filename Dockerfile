@@ -31,7 +31,7 @@ COPY playedu-api/playedu-common/pom.xml      /app/playedu-common/pom.xml
 COPY playedu-api/playedu-course/pom.xml      /app/playedu-course/pom.xml
 COPY playedu-api/playedu-resource/pom.xml    /app/playedu-resource/pom.xml
 COPY playedu-api/playedu-system/pom.xml      /app/playedu-system/pom.xml
-
+COPY playedu-api/playedu-certificate/pom.xml /app/playedu-certificate/pom.xml
 RUN /app/mvnw -B -DskipTests dependency:go-offline
 
 COPY playedu-api /app
