@@ -294,16 +294,26 @@ const CertificateEditorPage = () => {
                     border: selectedId === el.id ? "2px dashed #ff4d4f" : "1px dashed transparent",
                     cursor: "move",
                     zIndex: selectedId === el.id ? 20 : 10,
+                    userSelect: "none",
                   }}
+                  dragHandleClassName="cert-editor-drag-handle"
+                  cancel="" 
                   bounds="parent"
                   enableResizing={{
                     top: false, right: true, bottom: false, left: false,
                     topRight: false, bottomRight: true, bottomLeft: false, topLeft: false,
                   }}
                 >
-                  <div style={{ width: "100%", height: "100%", overflow: "hidden", pointerEvents: "none" }}>
+                  <div style={{
+                    width: "100%", height: "100%", overflow: "hidden",
+                    userSelect: "none", WebkitUserSelect: "none",
+                  }}>
                     {isImage ? (
-                      <img src={imgSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      <img
+                        src={imgSrc} alt="" draggable={false}
+                        onDragStart={(e) => e.preventDefault()}
+                        style={{ width: "100%", height: "100%", objectFit: "contain", userSelect: "none" }}
+                      />
                     ) : (
                       <div style={{
                         width: "100%", height: "100%",
