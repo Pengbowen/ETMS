@@ -252,32 +252,52 @@ export const TemplateEditor = ({
             placeholders.map((p) => (
               <Rnd
                 key={p.id}
+                default={{
+                  x: p.x,
+                  y: p.y,
+                  width: p.width,
+                  height: p.height,
+                }}
                 position={{ x: p.x, y: p.y }}
                 size={{ width: p.width, height: p.height }}
-                onDragStop={(_, d) => updatePlaceholder(p.id, { x: d.x, y: d.y })}
-                onResizeStop={(_, __, ref, ___, pos) =>
-                  updatePlaceholder(p.id, {
-                    width: parseInt(ref.style.width),
-                    height: parseInt(ref.style.height),
-                    ...pos,
-                  })
-                }
-                onClick={() => setSelectedId(p.id)}
-                style={{
-                  border: selectedId === p.id ? "2px dashed #266bcb" : "1px dashed transparent",
-                  cursor: "move",
+                onDragStop={(e, d) => {
+                  updatePlaceholder(p.id, { x: d.x, y: d.y });
                 }}
-                enableResizing={p.type === "text"}
+                onResizeStop={(e, direction, ref, delta, position) => {
+                  updatePlaceholder(p.id, {
+                    width: parseInt(ref.style.width, 10),
+                    height: parseInt(ref.style.height, 10),
+                    x: position.x,
+                    y: position.y,
+                  });
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(p.id);
+                }}
+                style={{
+                  border: selectedId === p.id ? "2px dashed #266bcb" : "1px solid rgba(38,107,203,0.3)",
+                  cursor: "move",
+                  zIndex: selectedId === p.id ? 20 : 10,
+                  background: "rgba(255,255,255,0.5)",
+                }}
+                enableResizing={{
+                  top: false, right: p.type === "text", bottom: false, left: p.type === "text",
+                  topRight: false, bottomRight: p.type === "text", bottomLeft: false, topLeft: false,
+                }}
                 disableDragging={false}
                 bounds="parent"
+                dragHandleClassName="rnd-drag-handle"
               >
                 <div
+                  className="rnd-drag-handle"
                   style={{
                     width: "100%",
                     height: "100%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    userSelect: "none",
                   }}
                 >
                   {p.type === "text" && (
@@ -285,8 +305,9 @@ export const TemplateEditor = ({
                       style={{
                         fontSize: p.fontSize,
                         color: p.color,
-                        opacity: 0.6,
+                        opacity: 0.7,
                         whiteSpace: "nowrap",
+                        pointerEvents: "none",
                       }}
                     >
                       {p.label}
@@ -297,12 +318,13 @@ export const TemplateEditor = ({
                       style={{
                         width: "100%",
                         height: "100%",
-                        background: `repeating-linear-gradient(45deg, #999 0, #999 2px, transparent 2px, transparent 8px)`,
+                        background: "repeating-linear-gradient(45deg, #999 0, #999 2px, transparent 2px, transparent 8px)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: "#666",
                         fontSize: 12,
+                        pointerEvents: "none",
                       }}
                     >
                       QR
