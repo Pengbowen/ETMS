@@ -61,14 +61,24 @@ public class CertificateController {
     @Log(title = "证书模板-创建", businessType = BusinessTypeConstant.INSERT)
     public JsonResponse templateStore(@RequestBody Map<String, Object> params) {
         String name = MapUtils.getString(params, "name");
+        String type = MapUtils.getString(params, "type", "completion");
+        String issuingAuthority = MapUtils.getString(params, "issuing_authority");
+        String numberingRule = MapUtils.getString(params, "numbering_rule");
         String backgroundImage = MapUtils.getString(params, "background_image");
+        String sampleImage = MapUtils.getString(params, "sample_image");
         Integer width = MapUtils.getInteger(params, "width", 1200);
         Integer height = MapUtils.getInteger(params, "height", 850);
-        String placeholders = MapUtils.getString(params, "placeholders");
-        String qrConfig = MapUtils.getString(params, "qr_config");
+        String placeholders = MapUtils.getString(params, "placeholders", "[]");
+        String qrConfig = MapUtils.getString(params, "qr_config", "{}");
+        Integer isEnabled = MapUtils.getInteger(params, "is_enabled", 1);
+        Integer isValid = MapUtils.getInteger(params, "is_valid", 1);
+        Integer expiryYears = MapUtils.getInteger(params, "expiry_years", 0);
+        String description = MapUtils.getString(params, "description");
         Integer adminId = BCtx.getId();
 
-        templateService.create(name, backgroundImage, width, height, placeholders, qrConfig, adminId);
+        templateService.create(name, type, issuingAuthority, numberingRule,
+                backgroundImage, sampleImage, width, height,
+                placeholders, qrConfig, isEnabled, isValid, expiryYears, description, adminId);
         return JsonResponse.success();
     }
 
@@ -79,13 +89,23 @@ public class CertificateController {
             throws NotFoundException {
         templateService.findOrFail(id);
         String name = MapUtils.getString(params, "name");
+        String type = MapUtils.getString(params, "type");
+        String issuingAuthority = MapUtils.getString(params, "issuing_authority");
+        String numberingRule = MapUtils.getString(params, "numbering_rule");
         String backgroundImage = MapUtils.getString(params, "background_image");
-        Integer width = MapUtils.getInteger(params, "width", 1200);
-        Integer height = MapUtils.getInteger(params, "height", 850);
+        String sampleImage = MapUtils.getString(params, "sample_image");
+        Integer width = MapUtils.getInteger(params, "width");
+        Integer height = MapUtils.getInteger(params, "height");
         String placeholders = MapUtils.getString(params, "placeholders");
         String qrConfig = MapUtils.getString(params, "qr_config");
+        Integer isEnabled = MapUtils.getInteger(params, "is_enabled");
+        Integer isValid = MapUtils.getInteger(params, "is_valid");
+        Integer expiryYears = MapUtils.getInteger(params, "expiry_years");
+        String description = MapUtils.getString(params, "description");
 
-        templateService.update(id, name, backgroundImage, width, height, placeholders, qrConfig);
+        templateService.update(id, name, type, issuingAuthority, numberingRule,
+                backgroundImage, sampleImage, width, height,
+                placeholders, qrConfig, isEnabled, isValid, expiryYears, description);
         return JsonResponse.success();
     }
 

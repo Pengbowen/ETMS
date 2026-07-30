@@ -55,12 +55,15 @@ const items = [
     "课程中心",
     "courses",
     <i className="iconfont icon-icon-study" />,
-    [
-      getItem("线上课", "/course", null, null, null, "course"),
-      getItem("证书模板", "/certificate/template", null, null, null, null),
-      getItem("发放记录", "/certificate/record", null, null, null, null),
-      getItem("发放规则", "/certificate/rule", null, null, null, null),
-    ],
+    [getItem("线上课", "/course", null, null, null, "course")],
+    null,
+    null
+  ),
+  getItem(
+    "证书管理",
+    "/certificate/template",
+    <i className="iconfont icon-icon-file" />,
+    null,
     null,
     null
   ),

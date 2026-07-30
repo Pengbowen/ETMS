@@ -30,6 +30,7 @@ const CourseUserPage = lazy(() => import("../pages/course/user"));
 const CertificateTemplatePage = lazy(() => import("../pages/certificate/template"));
 const CertificateRecordPage = lazy(() => import("../pages/certificate/record"));
 const CertificateRulePage = lazy(() => import("../pages/certificate/rule"));
+const CertificateEditorPage = lazy(() => import("../pages/certificate/template/editor"));
 const CertificateVerifyPage = lazy(() => import("../pages/certificate/verify"));
 //学员相关
 const MemberPage = lazy(() => import("../pages/member"));
@@ -131,6 +132,10 @@ const routes: RouteObject[] = [
           {
             path: "/certificate/record",
             element: <PrivateRoute Component={<CertificateRecordPage />} />,
+          },
+          {
+            path: "/certificate/template/editor",
+            element: <PrivateRoute Component={<CertificateEditorPage />} />,
           },
           {
             path: "/certificate/rule",

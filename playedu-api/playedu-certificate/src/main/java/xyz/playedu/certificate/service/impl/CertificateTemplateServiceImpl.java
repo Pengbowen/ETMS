@@ -26,45 +26,60 @@ public class CertificateTemplateServiceImpl
     }
 
     @Override
-    public void create(String name, String backgroundImage, Integer width, Integer height,
-                       String placeholders, String qrConfig, Integer adminId) {
+    public void create(String name, String type, String issuingAuthority, String numberingRule,
+                       String backgroundImage, String sampleImage, Integer width, Integer height,
+                       String placeholders, String qrConfig, Integer isEnabled, Integer isValid,
+                       Integer expiryYears, String description, Integer adminId) {
         CertificateTemplate template = new CertificateTemplate();
         template.setName(name);
-        template.setBackgroundImage(backgroundImage);
-        template.setWidth(width);
-        template.setHeight(height);
-        template.setPlaceholders(placeholders);
-        template.setQrConfig(qrConfig);
-        template.setStatus(1);
+        template.setType(type != null ? type : "completion");
+        template.setIssuingAuthority(issuingAuthority != null ? issuingAuthority : "");
+        template.setNumberingRule(numberingRule != null ? numberingRule : "CERT{yyyyMMdd}{nnnn}");
+        template.setBackgroundImage(backgroundImage != null ? backgroundImage : "");
+        template.setSampleImage(sampleImage != null ? sampleImage : "");
+        template.setWidth(width != null ? width : 1200);
+        template.setHeight(height != null ? height : 850);
+        template.setPlaceholders(placeholders != null ? placeholders : "[]");
+        template.setQrConfig(qrConfig != null ? qrConfig : "{}");
+        template.setStatus(isEnabled != null ? isEnabled : 1);
+        template.setIsValid(isValid != null ? isValid : 1);
+        template.setExpiryYears(expiryYears != null ? expiryYears : 0);
+        template.setDescription(description != null ? description : "");
         template.setAdminId(adminId);
         template.setCreatedAt(new Date());
         save(template);
     }
 
     @Override
-    public void update(Integer id, String name, String backgroundImage, Integer width,
-                       Integer height, String placeholders, String qrConfig) {
+    public void update(Integer id, String name, String type, String issuingAuthority, String numberingRule,
+                       String backgroundImage, String sampleImage, Integer width, Integer height,
+                       String placeholders, String qrConfig, Integer isEnabled, Integer isValid,
+                       Integer expiryYears, String description) {
         CertificateTemplate template = new CertificateTemplate();
         template.setId(id);
-        template.setName(name);
-        template.setBackgroundImage(backgroundImage);
-        template.setWidth(width);
-        template.setHeight(height);
-        template.setPlaceholders(placeholders);
-        template.setQrConfig(qrConfig);
+        if (name != null) template.setName(name);
+        if (type != null) template.setType(type);
+        if (issuingAuthority != null) template.setIssuingAuthority(issuingAuthority);
+        if (numberingRule != null) template.setNumberingRule(numberingRule);
+        if (backgroundImage != null) template.setBackgroundImage(backgroundImage);
+        if (sampleImage != null) template.setSampleImage(sampleImage);
+        if (width != null) template.setWidth(width);
+        if (height != null) template.setHeight(height);
+        if (placeholders != null) template.setPlaceholders(placeholders);
+        if (qrConfig != null) template.setQrConfig(qrConfig);
+        if (isEnabled != null) template.setStatus(isEnabled);
+        if (isValid != null) template.setIsValid(isValid);
+        if (expiryYears != null) template.setExpiryYears(expiryYears);
+        if (description != null) template.setDescription(description);
         updateById(template);
     }
 
     @Override
     public Map<Integer, CertificateTemplate> chunks(List<Integer> ids) {
         Map<Integer, CertificateTemplate> result = new HashMap<>();
-        if (ids == null || ids.isEmpty()) {
-            return result;
-        }
+        if (ids == null || ids.isEmpty()) return result;
         List<CertificateTemplate> list = listByIds(ids);
-        for (CertificateTemplate t : list) {
-            result.put(t.getId(), t);
-        }
+        for (CertificateTemplate t : list) result.put(t.getId(), t);
         return result;
     }
 }

@@ -1,137 +1,89 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Modal, Input, Upload, message, Space } from "antd";
+import {
+  Button, Table, Modal, Form, Input, Select, InputNumber, Switch,
+  Upload, message, Space, Tag, Typography,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, InboxOutlined, LinkOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined, InboxOutlined, SettingOutlined, LinkOutlined,
+} from "@ant-design/icons";
 import type { UploadProps } from "antd";
+import { useNavigate } from "react-router-dom";
 import { certificate } from "../../../api";
 import { dateFormat, getToken, checkUrl } from "../../../utils/index";
 import config from "../../../js/config";
-import { TemplateEditor, Placeholder } from "../../../compenents/template-editor";
 
 const { Dragger } = Upload;
+const { TextArea } = Input;
 
 interface DataType {
   id: number;
   name: string;
-  background_image: string;
-  width: number;
-  height: number;
-  placeholders: string;
-  qr_config: string;
+  type: string;
+  issuing_authority: string;
+  numbering_rule: string;
   status: number;
+  is_valid: number;
+  expiry_years: number;
   created_at: string;
 }
 
+const CERT_TYPES: Record<string, string> = {
+  completion: "结业证书",
+  training: "培训证书",
+  honor: "荣誉证书",
+  other: "其他",
+};
+
 const CertificateTemplatePage = () => {
+  const navigate = useNavigate();
   const [list, setList] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  // 编辑器状态
+  const [form] = Form.useForm();
   const [bgImage, setBgImage] = useState("");
-  const [bgUrl, setBgUrl] = useState("");
-  const [canvasWidth, setCanvasWidth] = useState(1200);
-  const [canvasHeight, setCanvasHeight] = useState(850);
-  const [placeholders, setPlaceholders] = useState<Placeholder[]>([]);
-  const [templateName, setTemplateName] = useState("");
-  const [showManualInput, setShowManualInput] = useState(false);
+  const [sampleImage, setSampleImage] = useState("");
 
-  useEffect(() => {
-    getList();
-  }, []);
+  useEffect(() => { getList(); }, []);
 
   const getList = () => {
     setLoading(true);
-    certificate
-      .templateList()
-      .then((res: any) => {
-        setList(res.data || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    certificate.templateList().then((res: any) => {
+      setList(res.data || []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   };
 
-  const openEditor = (record?: DataType) => {
-    if (record) {
-      setEditingId(record.id);
-      setTemplateName(record.name);
-      setBgImage(record.background_image);
-      setCanvasWidth(record.width);
-      setCanvasHeight(record.height);
-      try {
-        setPlaceholders(JSON.parse(record.placeholders || "[]"));
-      } catch {
-        setPlaceholders([]);
-      }
-      setBgUrl("");
-      // 获取现有背景图预览 URL
-      if (record.background_image) {
-        certificate.templatePreviewUrl(record.background_image).then((res: any) => {
-          if (res.data) setBgUrl(res.data);
-        });
-      }
-      setShowManualInput(true);
-    } else {
-      setEditingId(null);
-      setTemplateName("");
-      setBgImage("");
-      setBgUrl("");
-      setCanvasWidth(1200);
-      setCanvasHeight(850);
-      setPlaceholders([]);
-      setShowManualInput(false);
-    }
-    setShowEditor(true);
-  };
-
-  const handleSave = async () => {
-    if (!templateName.trim()) {
-      message.error("请输入模板名称");
-      return;
-    }
-    if (!bgImage) {
-      message.error("请上传背景图片");
-      return;
-    }
-
-    const qrPlaceholder = placeholders.find((p) => p.type === "qrcode");
-    const qrConfig = qrPlaceholder
-      ? { enabled: true, x: qrPlaceholder.x, y: qrPlaceholder.y, size: qrPlaceholder.size || 120 }
-      : { enabled: false };
-
-    const data = {
-      name: templateName,
-      background_image: bgImage,
-      width: canvasWidth,
-      height: canvasHeight,
-      placeholders: JSON.stringify(placeholders),
-      qr_config: JSON.stringify(qrConfig),
-    };
-
-    setSaving(true);
-    try {
-      if (editingId) {
-        await certificate.updateTemplate(editingId, data);
-        message.success("更新成功");
-      } else {
-        await certificate.storeTemplate(data);
-        message.success("创建成功");
-      }
-      setShowEditor(false);
-      getList();
-    } catch (err: any) {
-      message.error(err?.data?.msg || "保存失败");
-    } finally {
-      setSaving(false);
-    }
+  const handleCreate = () => {
+    form.validateFields().then((values) => {
+      const data = {
+        ...values,
+        background_image: bgImage,
+        sample_image: sampleImage,
+        is_enabled: values.is_enabled ? 1 : 0,
+        is_valid: values.is_valid ? 1 : 0,
+      };
+      setSaving(true);
+      certificate.storeTemplate(data).then(() => {
+        message.success("证书创建成功");
+        setShowCreate(false);
+        form.resetFields();
+        setBgImage("");
+        setSampleImage("");
+        getList();
+        setSaving(false);
+      }).catch((err: any) => {
+        message.error(err?.data?.msg || "创建失败");
+        setSaving(false);
+      });
+    });
   };
 
   const handleDelete = (id: number) => {
     Modal.confirm({
       title: "确认删除",
-      content: "确定要删除此证书模板吗？",
+      content: "删除后证书模板及关联数据将无法恢复",
       onOk() {
         certificate.destroyTemplate(id).then(() => {
           message.success("删除成功");
@@ -141,59 +93,56 @@ const CertificateTemplatePage = () => {
     });
   };
 
-  const uploadProps: UploadProps = {
-    name: "file",
-    multiple: false,
+  const uploadBgProps: UploadProps = {
+    name: "file", multiple: false,
     accept: "image/png,image/jpeg,image/jpg",
     action: checkUrl(config.app_url) + "backend/v1/upload/minio",
-    headers: {
-      authorization: "Bearer " + getToken(),
-    },
+    headers: { authorization: "Bearer " + getToken() },
     showUploadList: false,
     onChange(info) {
-      const { status, response } = info.file;
-      if (status === "done") {
-        if (response && response.code === 0) {
-          const path = response.data?.path || "";
-          setBgImage(path);
-          // 获取预览 URL
-          certificate.templatePreviewUrl(path).then((res: any) => {
-            if (res.data) setBgUrl(res.data);
-          });
-          message.success("背景图上传成功");
-        } else {
-          message.error(response?.msg || "上传失败");
-        }
-      } else if (status === "error") {
-        message.error("上传失败，请重试");
+      if (info.file.status === "done" && info.file.response?.code === 0) {
+        setBgImage(info.file.response.data?.path || "");
+        message.success("背景图上传成功");
+      } else if (info.file.status === "error") {
+        message.error("上传失败");
+      }
+    },
+  };
+
+  const uploadSampleProps: UploadProps = {
+    ...uploadBgProps,
+    onChange(info) {
+      if (info.file.status === "done" && info.file.response?.code === 0) {
+        setSampleImage(info.file.response.data?.path || "");
+        message.success("样例图上传成功");
+      } else if (info.file.status === "error") {
+        message.error("上传失败");
       }
     },
   };
 
   const columns: ColumnsType<DataType> = [
-    { title: "模板名称", dataIndex: "name" },
+    { title: "证书名称", dataIndex: "name", width: 160 },
+    { title: "类型", dataIndex: "type", width: 100,
+      render: (t) => <Tag>{CERT_TYPES[t] || t}</Tag> },
+    { title: "发证单位", dataIndex: "issuing_authority", width: 140 },
+    { title: "编号规则", dataIndex: "numbering_rule", width: 160 },
+    { title: "有效", dataIndex: "is_valid", width: 70,
+      render: (v) => v === 1 ? <Tag color="green">是</Tag> : <Tag color="red">否</Tag> },
+    { title: "有效期", dataIndex: "expiry_years", width: 80,
+      render: (v) => v === 0 ? "永久" : `${v}年` },
+    { title: "创建时间", dataIndex: "created_at", width: 140,
+      render: (t) => dateFormat(t) },
     {
-      title: "尺寸",
-      render: (_, r) => `${r.width}×${r.height}`,
-    },
-    {
-      title: "元素数量",
-      render: (_, r) => {
-        try { return JSON.parse(r.placeholders || "[]").length; } catch { return 0; }
-      },
-    },
-    { title: "状态", dataIndex: "status", render: (s) => (s === 1 ? "启用" : "禁用") },
-    { title: "创建时间", dataIndex: "created_at", render: (t) => dateFormat(t) },
-    {
-      title: "操作",
+      title: "操作", width: 160, fixed: "right" as const,
       render: (_, record) => (
         <Space>
-          <Button type="link" size="small" onClick={() => openEditor(record)}>
-            编辑
+          <Button type="link" size="small" icon={<SettingOutlined />}
+            onClick={() => navigate(`/certificate/template/editor?id=${record.id}`)}>
+            配置
           </Button>
-          <Button type="link" size="small" danger onClick={() => handleDelete(record.id)}>
-            删除
-          </Button>
+          <Button type="link" size="small" danger
+            onClick={() => handleDelete(record.id)}>删除</Button>
         </Space>
       ),
     },
@@ -201,115 +150,78 @@ const CertificateTemplatePage = () => {
 
   return (
     <div>
-      <div className="playedu-main-title float-left mb-24">证书模板</div>
-      <div className="float-left mb-24">
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => openEditor()}>
-          新建模板
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+        <div className="playedu-main-title">证书管理</div>
+        <Button type="primary" icon={<PlusOutlined />} size="large"
+          onClick={() => setShowCreate(true)}>
+          新建证书
         </Button>
       </div>
-      <div className="float-left">
-        <Table columns={columns} dataSource={list} loading={loading} rowKey="id" />
-      </div>
+      <Table columns={columns} dataSource={list} loading={loading} rowKey="id"
+        scroll={{ x: 1100 }} />
 
-      <Modal
-        title={editingId ? "编辑证书模板" : "新建证书模板"}
-        open={showEditor}
-        onCancel={() => setShowEditor(false)}
-        width="95%"
-        style={{ top: 20 }}
-        footer={
-          <Space>
-            <Button onClick={() => setShowEditor(false)}>取消</Button>
-            <Button type="primary" loading={saving} onClick={handleSave}>
-              保存模板
-            </Button>
+      <Modal title="新建证书" open={showCreate} width={720}
+        onCancel={() => setShowCreate(false)} onOk={handleCreate}
+        confirmLoading={saving} destroyOnClose>
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item name="name" label="证书名称" rules={[{ required: true }]}>
+            <Input placeholder="如：新员工入职培训结业证书" />
+          </Form.Item>
+          <Form.Item name="type" label="证书类型" initialValue="completion">
+            <Select options={[
+              { label: "结业证书", value: "completion" },
+              { label: "培训证书", value: "training" },
+              { label: "荣誉证书", value: "honor" },
+              { label: "其他", value: "other" },
+            ]} />
+          </Form.Item>
+          <Form.Item name="issuing_authority" label="发证单位">
+            <Input placeholder="如：XX公司培训部" />
+          </Form.Item>
+          <Form.Item name="numbering_rule" label="编号规则" initialValue="CERT{yyyyMMdd}{nnnn}"
+            tooltip="{yyyyMMdd}=日期, {nnnn}=4位随机数">
+            <Input placeholder="CERT{yyyyMMdd}{nnnn}" />
+          </Form.Item>
+
+          <Form.Item label="证书背景图">
+            <Dragger {...uploadBgProps}>
+              <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+              {bgImage ? (
+                <p style={{ color: "#52c41a" }}>✓ {bgImage}</p>
+              ) : (
+                <p className="ant-upload-text">上传背景底图</p>
+              )}
+            </Dragger>
+          </Form.Item>
+
+          <Form.Item label="证书样例图">
+            <Dragger {...uploadSampleProps}>
+              <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+              {sampleImage ? (
+                <p style={{ color: "#52c41a" }}>✓ {sampleImage}</p>
+              ) : (
+                <p className="ant-upload-text">上传样例预览图</p>
+              )}
+            </Dragger>
+          </Form.Item>
+
+          <Form.Item name="description" label="证书描述">
+            <TextArea rows={3} placeholder="证书描述说明..." />
+          </Form.Item>
+
+          <Space size="large">
+            <Form.Item name="is_valid" label="是否有效" valuePropName="checked" initialValue={true}>
+              <Switch />
+            </Form.Item>
+            <Form.Item name="expiry_years" label="有效期(年)" initialValue={0}
+              tooltip="0 表示永久有效">
+              <InputNumber min={0} max={99} style={{ width: 100 }} />
+            </Form.Item>
+            <Form.Item name="is_enabled" label="启用" valuePropName="checked" initialValue={true}>
+              <Switch />
+            </Form.Item>
           </Space>
-        }
-        destroyOnClose
-      >
-        <div style={{ marginBottom: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
-          <div style={{ flex: 1, maxWidth: 300 }}>
-            <div style={{ marginBottom: 4, fontWeight: 500 }}>模板名称</div>
-            <Input
-              placeholder="如：结业证书"
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-            />
-          </div>
-
-          <div style={{ flex: 2 }}>
-            <div style={{ marginBottom: 4, fontWeight: 500 }}>
-              背景图片
-              <Button
-                type="link"
-                size="small"
-                icon={<LinkOutlined />}
-                onClick={() => setShowManualInput(!showManualInput)}
-                style={{ marginLeft: 8 }}
-              >
-                {showManualInput ? "隐藏" : "手动输入路径"}
-              </Button>
-            </div>
-
-            {showManualInput ? (
-              <Input
-                placeholder="输入 S3 路径"
-                value={bgImage}
-                onChange={(e) => {
-                const val = e.target.value;
-                setBgImage(val);
-                setBgUrl("");
-                if (val) {
-                  certificate.templatePreviewUrl(val).then((res: any) => {
-                    if (res.data) setBgUrl(res.data);
-                  });
-                }
-              }}
-              />
-            ) : (
-              <Dragger {...uploadProps}>
-                <p className="ant-upload-drag-icon">
-                  <InboxOutlined />
-                </p>
-                {bgImage ? (
-                  <p style={{ color: "#52c41a" }}>✓ 背景图已就绪（{bgImage}）</p>
-                ) : (
-                  <>
-                    <p className="ant-upload-text">点击或拖拽上传背景图</p>
-                    <p className="ant-upload-hint">支持 PNG / JPG 格式</p>
-                  </>
-                )}
-              </Dragger>
-            )}
-          </div>
-        </div>
-
-        {bgImage && (
-          <TemplateEditor
-            backgroundImage={bgImage}
-            backgroundUrl={bgUrl || undefined}
-            width={canvasWidth}
-            height={canvasHeight}
-            placeholders={placeholders}
-            onChange={setPlaceholders}
-          />
-        )}
-
-        {!bgImage && (
-          <div
-            style={{
-              height: 300,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#f5f5f5",
-              borderRadius: 8,
-              color: "#999",
-            }}
-          >
-            请先上传背景图，然后开始编辑
-          </div>
-        )}
+        </Form>
       </Modal>
     </div>
   );
