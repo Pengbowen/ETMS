@@ -229,7 +229,7 @@ export const TemplateEditor = ({
             <img
               src={backgroundUrl}
               alt="背景图"
-              style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
             />
           )}
           {!backgroundUrl && !backgroundImage && (
