@@ -165,7 +165,11 @@ const CertificateEditorPage = () => {
           <div style={{ marginBottom: 12, fontWeight: 500, fontSize: 13 }}>
             元素配置列表
           </div>
-          {elements.map((el, idx) => (
+          {elements.map((el, idx) => {
+            const isImage = el.content.startsWith("<img>") && el.content.endsWith("</img>");
+            const imgSrc = isImage ? el.content.slice(5, -6) : "";
+
+            return (
             <div key={el.id} style={{
               marginBottom: 8, padding: 10, borderRadius: 6,
               background: selectedId === el.id ? "#e6f0ff" : "#fff",
@@ -179,22 +183,54 @@ const CertificateEditorPage = () => {
                     background: "#266bcb", color: "#fff", fontSize: 11,
                     alignItems: "center", justifyContent: "center",
                   }}>{idx + 1}</span>
-                  <Select size="small" value={el.type} style={{ width: 110 }}
-                    options={ELEMENT_TYPE_OPTIONS}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(v) => updateElement(el.id, { type: v })} />
+                  {isImage ? (
+                    <span style={{ fontSize: 12, color: "#266bcb", fontWeight: 500, padding: "0 8px" }}>🖼️ 图片</span>
+                  ) : (
+                    <Select size="small" value={el.type} style={{ width: 110 }}
+                      options={ELEMENT_TYPE_OPTIONS}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(v) => updateElement(el.id, { type: v })} />
+                  )}
                 </Space>
                 <DeleteOutlined style={{ color: "#ff4d4f", cursor: "pointer" }}
                   onClick={(e) => { e.stopPropagation(); deleteElement(el.id); }} />
               </div>
 
+              {/* 图片缩略图预览（收起状态） */}
+              {isImage && imgSrc && selectedId !== el.id && (
+                <div style={{
+                  width: "100%", height: 80, marginBottom: 6, borderRadius: 4, overflow: "hidden",
+                  background: "#f5f5f5", border: "1px solid #e8e8e8",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <img src={imgSrc} alt="" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                </div>
+              )}
+
               {selectedId === el.id && (
                 <>
-                  <Input size="small" value={el.content}
-                    placeholder="文本内容"
-                    style={{ marginBottom: 6 }}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => updateElement(el.id, { content: e.target.value })} />
+                  {isImage ? (
+                    /* 图片元素：只显示图片预览和坐标尺寸 */
+                    <>
+                      {imgSrc && (
+                        <div style={{
+                          width: "100%", height: 100, marginBottom: 6, borderRadius: 4, overflow: "hidden",
+                          background: "#f5f5f5", border: "1px solid #e8e8e8",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <img src={imgSrc} alt="" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Input size="small" value={el.content}
+                        placeholder="文本内容"
+                        style={{ marginBottom: 6 }}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => updateElement(el.id, { content: e.target.value })} />
+                    </>
+                  )}
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, marginBottom: 6 }}>
                     <div><span style={{ fontSize: 11, color: "#999" }}>X</span>
@@ -211,29 +247,33 @@ const CertificateEditorPage = () => {
                         onChange={(v) => updateElement(el.id, { height: v || 30 })} /></div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
-                    <Select size="small" value={el.fontFamily} style={{ flex: 1 }}
-                      options={FONT_FAMILIES}
-                      onChange={(v) => updateElement(el.id, { fontFamily: v })} />
-                    <InputNumber size="small" value={el.fontSize} min={8} max={120}
-                      style={{ width: 60 }} placeholder="字号"
-                      onChange={(v) => updateElement(el.id, { fontSize: v || 14 })} />
-                  </div>
+                  {!isImage && (
+                    <>
+                      <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                        <Select size="small" value={el.fontFamily} style={{ flex: 1 }}
+                          options={FONT_FAMILIES}
+                          onChange={(v) => updateElement(el.id, { fontFamily: v })} />
+                        <InputNumber size="small" value={el.fontSize} min={8} max={120}
+                          style={{ width: 60 }} placeholder="字号"
+                          onChange={(v) => updateElement(el.id, { fontSize: v || 14 })} />
+                      </div>
 
-                  <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
-                    <InputNumber size="small" value={el.lineHeight} min={0.5} max={5} step={0.1}
-                      style={{ width: 60 }} placeholder="行高"
-                      onChange={(v) => updateElement(el.id, { lineHeight: v || 1.5 })} />
-                    <ColorPicker size="small" value={el.color}
-                      onChange={(_, hex) => updateElement(el.id, { color: hex })} />
-                    <Select size="small" value={el.fontWeight} style={{ width: 80 }}
-                      options={[{ label: "正常", value: "normal" }, { label: "加粗", value: "bold" }]}
-                      onChange={(v) => updateElement(el.id, { fontWeight: v })} />
-                  </div>
+                      <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                        <InputNumber size="small" value={el.lineHeight} min={0.5} max={5} step={0.1}
+                          style={{ width: 60 }} placeholder="行高"
+                          onChange={(v) => updateElement(el.id, { lineHeight: v || 1.5 })} />
+                        <ColorPicker size="small" value={el.color}
+                          onChange={(_, hex) => updateElement(el.id, { color: hex })} />
+                        <Select size="small" value={el.fontWeight} style={{ width: 80 }}
+                          options={[{ label: "正常", value: "normal" }, { label: "加粗", value: "bold" }]}
+                          onChange={(v) => updateElement(el.id, { fontWeight: v })} />
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>
-          ))}
+          )})}
 
           {elements.length === 0 && (
             <div style={{ textAlign: "center", color: "#bbb", padding: 40 }}>
@@ -296,8 +336,6 @@ const CertificateEditorPage = () => {
                     zIndex: selectedId === el.id ? 20 : 10,
                     userSelect: "none",
                   }}
-                  dragHandleClassName="cert-editor-drag-handle"
-                  cancel="" 
                   bounds="parent"
                   enableResizing={{
                     top: false, right: true, bottom: false, left: false,
@@ -306,7 +344,7 @@ const CertificateEditorPage = () => {
                 >
                   <div style={{
                     width: "100%", height: "100%", overflow: "hidden",
-                    userSelect: "none", WebkitUserSelect: "none",
+                    userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none",
                   }}>
                     {isImage ? (
                       <img

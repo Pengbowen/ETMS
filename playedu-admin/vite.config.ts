@@ -15,6 +15,12 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  define: {
+    "process.env": {},
+  },
+  optimizeDeps: {
+    include: ["react-rnd"],
+  },
   build: {
     rollupOptions: {
       plugins: [gzipPlugin()],

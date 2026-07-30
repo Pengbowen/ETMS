@@ -40,6 +40,7 @@ const CertificateTemplatePage = () => {
   const [list, setList] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
   const [bgImage, setBgImage] = useState("");
@@ -78,6 +79,58 @@ const CertificateTemplatePage = () => {
         setSaving(false);
       });
     });
+  };
+
+  const handleEdit = (record: DataType) => {
+    setEditingId(record.id);
+    form.setFieldsValue({
+      name: record.name,
+      type: record.type,
+      issuing_authority: record.issuing_authority,
+      numbering_rule: record.numbering_rule,
+      description: (record as any).description || "",
+      is_valid: record.is_valid === 1,
+      expiry_years: record.expiry_years,
+      is_enabled: (record as any).is_enabled === 1,
+    });
+    setBgImage((record as any).background_image || "");
+    setSampleImage((record as any).sample_image || "");
+    setShowCreate(true);
+  };
+
+  const handleUpdate = () => {
+    if (!editingId) return;
+    form.validateFields().then((values) => {
+      const data = {
+        ...values,
+        background_image: bgImage,
+        sample_image: sampleImage,
+        is_enabled: values.is_enabled ? 1 : 0,
+        is_valid: values.is_valid ? 1 : 0,
+      };
+      setSaving(true);
+      certificate.updateTemplate(editingId, data).then(() => {
+        message.success("证书更新成功");
+        setShowCreate(false);
+        setEditingId(null);
+        form.resetFields();
+        setBgImage("");
+        setSampleImage("");
+        getList();
+        setSaving(false);
+      }).catch((err: any) => {
+        message.error(err?.data?.msg || "更新失败");
+        setSaving(false);
+      });
+    });
+  };
+
+  const closeModal = () => {
+    setShowCreate(false);
+    setEditingId(null);
+    form.resetFields();
+    setBgImage("");
+    setSampleImage("");
   };
 
   const handleDelete = (id: number) => {
@@ -137,6 +190,8 @@ const CertificateTemplatePage = () => {
       title: "操作", width: 160, fixed: "right" as const,
       render: (_, record) => (
         <Space>
+          <Button type="link" size="small"
+            onClick={() => handleEdit(record)}>编辑</Button>
           <Button type="link" size="small" icon={<SettingOutlined />}
             onClick={() => navigate(`/certificate/template/editor?id=${record.id}`)}>
             配置
@@ -160,8 +215,8 @@ const CertificateTemplatePage = () => {
       <Table columns={columns} dataSource={list} loading={loading} rowKey="id"
         scroll={{ x: 1100 }} />
 
-      <Modal title="新建证书" open={showCreate} width={720}
-        onCancel={() => setShowCreate(false)} onOk={handleCreate}
+      <Modal title={editingId ? "编辑证书" : "新建证书"} open={showCreate} width={720}
+        onCancel={closeModal} onOk={editingId ? handleUpdate : handleCreate}
         confirmLoading={saving} destroyOnClose>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="name" label="证书名称" rules={[{ required: true }]}>
