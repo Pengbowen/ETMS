@@ -250,6 +250,15 @@ public class CertificateController {
         return ResponseEntity.ok().headers(headers).body(pdfBytes);
     }
 
+    // ==================== Preview URL ====================
+
+    @BackendPermission(slug = "certificate-template")
+    @GetMapping("/template/preview-url")
+    public JsonResponse templatePreviewUrl(@RequestParam("path") String path) {
+        String url = new S3Util(appConfigService.getS3Config()).getUrl(path);
+        return JsonResponse.data(url);
+    }
+
     // ==================== Public Verify ====================
 
     @GetMapping("/verify")

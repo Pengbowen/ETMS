@@ -26,6 +26,7 @@ export interface Placeholder {
 
 interface Props {
   backgroundImage: string;
+  backgroundUrl?: string;
   width: number;
   height: number;
   placeholders: Placeholder[];
@@ -46,6 +47,7 @@ const TEXT_KEYS = [
 ];
 
 export const TemplateEditor = ({
+    backgroundUrl,
   backgroundImage,
   width,
   height,
@@ -218,14 +220,34 @@ export const TemplateEditor = ({
           ref={containerRef}
           style={{
             ...canvasStyle,
-            backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundColor: backgroundImage ? undefined : "#fff",
+            backgroundColor: "#fff",
             boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
             overflow: "hidden",
           }}
         >
+          {backgroundUrl && (
+            <img
+              src={backgroundUrl}
+              alt="背景图"
+              style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          )}
+          {!backgroundUrl && !backgroundImage && (
+            <div
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#bbb",
+                fontSize: 18,
+              }}
+            >
+              请上传背景图片
+            </div>
+          )}
           {!preview &&
             placeholders.map((p) => (
               <Rnd

@@ -18,6 +18,10 @@ export function destroyTemplate(id: number) {
   return client.destroy("/backend/v1/certificate/template/destroy/" + id);
 }
 
+export function templatePreviewUrl(path: string) {
+  return client.get("/backend/v1/certificate/template/preview-url", { path });
+}
+
 // ==================== 规则管理 ====================
 
 export function ruleList() {
