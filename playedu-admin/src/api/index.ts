@@ -16,4 +16,5 @@ export * as appConfig from "./app-config";
 export * as dashboard from "./dashboard";
 export * as adminLog from "./admin-log";
 export * as certificate from "./certificate";
+export * as question from "./question";
 export * as ldap from "./ldap";

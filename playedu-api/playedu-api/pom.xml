@@ -43,6 +43,11 @@
             <artifactId>playedu-certificate</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>xyz.playedu</groupId>
+            <artifactId>playedu-question</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -68,6 +68,14 @@ const items = [
     null
   ),
   getItem(
+    "试题管理",
+    "/question/index",
+    <i className="iconfont icon-icon-test" />,
+    null,
+    null,
+    null
+  ),
+  getItem(
     "学员管理",
     "user",
     <i className="iconfont icon-icon-user" />,
@@ -125,6 +133,7 @@ export const LeftMenu: React.FC = () => {
     "^/department": ["user"],
     "^/course": ["courses"],
     "^/certificate": ["courses"],
+    "^/question": ["/question/index"],
     "^/system": ["system"],
   };
 

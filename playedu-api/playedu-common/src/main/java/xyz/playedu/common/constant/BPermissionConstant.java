@@ -46,6 +46,8 @@ public class BPermissionConstant {
     public static final String CERTIFICATE_TEMPLATE = "certificate-template";
     public static final String CERTIFICATE_RULE = "certificate-rule";
     public static final String CERTIFICATE_RECORD = "certificate-record";
+    public static final String QUESTION_CATEGORY = "question-category";
+    public static final String QUESTION = "question";
     // ##### 友情分割线 ##################################################
 
     public static final String DATA_USER_NAME = "data-user-name";

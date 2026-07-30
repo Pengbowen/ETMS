@@ -28,6 +28,9 @@ const CoursePage = lazy(() => import("../pages/course/index"));
 const CourseUserPage = lazy(() => import("../pages/course/user"));
 //证书管理
 const CertificateTemplatePage = lazy(() => import("../pages/certificate/template"));
+//试题管理
+const QuestionIndexPage = lazy(() => import("../pages/question/index"));
+const QuestionEditPage = lazy(() => import("../pages/question/edit"));
 const CertificateRecordPage = lazy(() => import("../pages/certificate/record"));
 const CertificateRulePage = lazy(() => import("../pages/certificate/rule"));
 const CertificateEditorPage = lazy(() => import("../pages/certificate/template/editor"));
@@ -140,6 +143,18 @@ const routes: RouteObject[] = [
           {
             path: "/certificate/rule",
             element: <PrivateRoute Component={<CertificateRulePage />} />,
+          },
+          {
+            path: "/question/index",
+            element: <PrivateRoute Component={<QuestionIndexPage />} />,
+          },
+          {
+            path: "/question/edit/:id",
+            element: <PrivateRoute Component={<QuestionEditPage />} />,
+          },
+          {
+            path: "/question/edit",
+            element: <PrivateRoute Component={<QuestionEditPage />} />,
           },
           {
             path: "/member",

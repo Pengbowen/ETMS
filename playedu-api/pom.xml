@@ -23,6 +23,7 @@
         <module>playedu-course</module>
         <module>playedu-resource</module>
         <module>playedu-certificate</module>
+        <module>playedu-question</module>
     </modules>
 
     <properties>

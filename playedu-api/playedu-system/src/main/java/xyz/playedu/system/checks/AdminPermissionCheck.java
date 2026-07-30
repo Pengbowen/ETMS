@@ -233,6 +233,61 @@ public class AdminPermissionCheck implements CommandLineRunner {
                                                     }
                                                 },
                                             });
+                                    // 证书管理
+                                    put(
+                                            "证书管理",
+                                            new AdminPermission[] {
+                                                new AdminPermission() {
+                                                    {
+                                                        setSort(0);
+                                                        setName("证书模板");
+                                                        setSlug(
+                                                                BPermissionConstant
+                                                                        .CERTIFICATE_TEMPLATE);
+                                                    }
+                                                },
+                                                new AdminPermission() {
+                                                    {
+                                                        setSort(10);
+                                                        setName("证书规则");
+                                                        setSlug(
+                                                                BPermissionConstant
+                                                                        .CERTIFICATE_RULE);
+                                                    }
+                                                },
+                                                new AdminPermission() {
+                                                    {
+                                                        setSort(20);
+                                                        setName("发放记录");
+                                                        setSlug(
+                                                                BPermissionConstant
+                                                                        .CERTIFICATE_RECORD);
+                                                    }
+                                                },
+                                            });
+                                    // 题库管理
+                                    put(
+                                            "题库管理",
+                                            new AdminPermission[] {
+                                                new AdminPermission() {
+                                                    {
+                                                        setSort(0);
+                                                        setName("试题分类");
+                                                        setSlug(
+                                                                BPermissionConstant
+                                                                        .QUESTION_CATEGORY);
+                                                    }
+                                                },
+                                                new AdminPermission() {
+                                                    {
+                                                        setSort(10);
+                                                        setName("试题管理");
+                                                        setSlug(
+                                                                BPermissionConstant
+                                                                        .QUESTION);
+                                                    }
+                                                },
+                                            });
                                 }
                             });
                     put(
