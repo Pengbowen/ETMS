@@ -8,6 +8,7 @@ import {
   InboxOutlined, PictureOutlined,
 } from "@ant-design/icons";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Rnd } from "react-rnd";
 import { certificate } from "../../../../api";
 import { getToken, checkUrl } from "../../../../utils/index";
 import config from "../../../../js/config";
@@ -275,32 +276,51 @@ const CertificateEditorPage = () => {
               const imgSrc = isImage ? el.content.slice(5, -6) : "";
 
               return (
-                <div key={el.id} style={{
-                  position: "absolute",
-                  left: el.x, top: el.y,
-                  width: el.width, height: el.height,
-                  border: selectedId === el.id ? "2px dashed #ff4d4f" : "1px dashed transparent",
-                  cursor: "pointer",
-                  overflow: "hidden",
-                }} onClick={() => setSelectedId(el.id)}>
-                  {isImage ? (
-                    <img src={imgSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                  ) : (
-                    <div style={{
-                      width: "100%", height: "100%",
-                      fontFamily: el.fontFamily,
-                      fontSize: el.fontSize,
-                      color: el.color,
-                      fontWeight: el.fontWeight as any,
-                      lineHeight: el.lineHeight,
-                      display: "flex",
-                      alignItems: "center",
-                      wordBreak: "break-word",
-                    }}>
-                      {el.content}
-                    </div>
-                  )}
-                </div>
+                <Rnd
+                  key={el.id}
+                  position={{ x: el.x, y: el.y }}
+                  size={{ width: el.width, height: el.height }}
+                  onDragStop={(e, d) => updateElement(el.id, { x: d.x, y: d.y })}
+                  onResizeStop={(e, direction, ref, delta, position) => {
+                    updateElement(el.id, {
+                      width: parseInt(ref.style.width, 10),
+                      height: parseInt(ref.style.height, 10),
+                      x: position.x,
+                      y: position.y,
+                    });
+                  }}
+                  onMouseDown={() => setSelectedId(el.id)}
+                  style={{
+                    border: selectedId === el.id ? "2px dashed #ff4d4f" : "1px dashed transparent",
+                    cursor: "move",
+                    zIndex: selectedId === el.id ? 20 : 10,
+                  }}
+                  bounds="parent"
+                  enableResizing={{
+                    top: false, right: true, bottom: false, left: false,
+                    topRight: false, bottomRight: true, bottomLeft: false, topLeft: false,
+                  }}
+                >
+                  <div style={{ width: "100%", height: "100%", overflow: "hidden", pointerEvents: "none" }}>
+                    {isImage ? (
+                      <img src={imgSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    ) : (
+                      <div style={{
+                        width: "100%", height: "100%",
+                        fontFamily: el.fontFamily,
+                        fontSize: el.fontSize,
+                        color: el.color,
+                        fontWeight: el.fontWeight as any,
+                        lineHeight: el.lineHeight,
+                        display: "flex",
+                        alignItems: "center",
+                        wordBreak: "break-word",
+                      }}>
+                        {el.content}
+                      </div>
+                    )}
+                  </div>
+                </Rnd>
               );
             })}
           </div>
